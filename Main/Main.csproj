@@ -7,4 +7,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Debugger\Debugger.csproj" />
+    <ProjectReference Include="..\IniParser\IniParser.csproj" />
+  </ItemGroup>
+
 </Project>

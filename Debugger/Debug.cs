@@ -1,19 +1,19 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System;
 using System.Text;
+using System.IO;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace Chelp
+namespace Debugger
 {
-    enum DebugTypes
+    public enum DebugTypes
     {
         DEBUG,
         WARNING,
         ERROR,
     }
 
-    static class Debug
+    public static class Debug
     {
         const string LOGPATH = "./debug";
         const string LOGFILENAME = "log.txt";
