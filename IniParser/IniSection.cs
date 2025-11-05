@@ -22,13 +22,11 @@ namespace IniParser
             else
                 parsedValue = value;
             _data.Add(key, parsedValue);
-            IniFile.logger?.Invoke($"{GetType().Name}: successfully added [{key}] = {parsedValue.GetType()}:[{parsedValue}] in secton [{Name}]", DebugTypes.DEBUG);
         }
         private bool CheckForKey(string key)
         {
             if (!_data.ContainsKey(key))
             {
-                IniFile.logger?.Invoke($"{GetType().Name}: key [{key}] is not found in [{Name}] section!", DebugTypes.ERROR);
                 return false;
             }
             return true;

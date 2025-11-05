@@ -1,17 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
-using Newtonsoft.Json;
+using System.Text.Json;
 using Debugger;
+using Newtonsoft.Json;
 
 namespace ConsoleApp.Compilation
 {
     internal static class CompilerFinder
     {
         private static Logger logger = Debug.Log;
+
+        const string CACHE_DIRECTORY = "Cache";
+        const string CACHE_FILE_NAME = "Compilers.json";
+        static readonly string CACHE_FILE_PATH = Path.Combine(CACHE_DIRECTORY, CACHE_FILE_NAME);
+
         static readonly string availableCompilersJsonFilePath = Path.Combine("Assets", "AvailableCompilers.json");
         static readonly Dictionary<string, string> compilersDictionary;
         public static List<Compiler> compilers = [];
@@ -23,7 +27,6 @@ namespace ConsoleApp.Compilation
                 logger("file with available compilers doesn't exists!", DebugTypes.ERROR);
                 throw new FileNotFoundException($"File doesn't exists on {availableCompilersJsonFilePath}!");
             }
-
 
             string fileContent = File.ReadAllText(availableCompilersJsonFilePath);
             var tempDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(fileContent);
@@ -37,6 +40,15 @@ namespace ConsoleApp.Compilation
         }
         public static void SearchForCompiler()
         {
+            var cachedData = LoadFromCache();
+
+            if (cachedData != null)
+            {
+                logger($"found cached data in {CACHE_FILE_PATH}!");
+                compilers = cachedData;
+                return;
+            }
+
             string? pathEnvVariable = Environment.GetEnvironmentVariable("Path");
 
             if (pathEnvVariable == null)
@@ -50,7 +62,7 @@ namespace ConsoleApp.Compilation
 
             foreach (string path in pathsInPathVariable)
             {
-                logger($"checking {path} . . .");
+                logger($"checking directory: {path}");
                 if (!Path.Exists(path))
                 {
                     logger($"{path} doesn't exists! skipping.", DebugTypes.WARNING);
@@ -73,6 +85,39 @@ namespace ConsoleApp.Compilation
                     compilers.Add(compiler);
                 }
             }
+            if (compilers.Count == 0)
+            {
+                logger("no compilers found!", DebugTypes.ERROR);
+                return;
+            }
+            SaveInCache();
+        }
+        public static void SaveInCache()
+        {
+            Directory.CreateDirectory(CACHE_DIRECTORY);
+            var writer = File.CreateText(CACHE_FILE_PATH);
+
+            var content = JsonConvert.SerializeObject(compilers);
+            writer.Write(content);
+            writer.Flush();
+            logger($"caching data to {CACHE_FILE_PATH}");
+        }
+        public static List<Compiler>? LoadFromCache()
+        {
+            if (!File.Exists(CACHE_FILE_PATH))
+            {
+                return null;
+            }
+
+            string fileContent = File.ReadAllText(CACHE_FILE_PATH);
+            var cachedCompilers = new List<Compiler>();
+            cachedCompilers = JsonConvert.DeserializeObject<List<Compiler>>(fileContent);
+
+            if (cachedCompilers?.Count == 0)
+            {
+                return null;
+            }
+            return cachedCompilers;
         }
     }
 }

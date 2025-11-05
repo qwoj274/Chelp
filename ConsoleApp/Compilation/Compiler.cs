@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
+using System.Linq;
 
 namespace ConsoleApp.Compilation
 {
@@ -16,6 +17,7 @@ namespace ConsoleApp.Compilation
         public string Description { get; private set; }
         public bool IsValid { get; private set; } = false;
         public readonly string Fullpath = string.Empty;
+        public readonly string Version = string.Empty;
 
         public Compiler(string name, string description, string fullpath)
         {
@@ -28,6 +30,7 @@ namespace ConsoleApp.Compilation
             }
             Fullpath = fullpath;
             Description = description;
+            Version = GetVersion();
         }
         internal bool SelfTest()
         {
@@ -73,9 +76,28 @@ namespace ConsoleApp.Compilation
 
             return IsValid;
         }
-        public int Compile(string outputFile, string[]? arguments, params string[] inputFiles)
+        public string GetVersion()
         {
-            IEnumerable<string> SelectValidFiles(string[] filesList)
+            Process getCompilerVersionProcess = new()
+            {
+                StartInfo =
+                {
+                    FileName = Fullpath,
+                    Arguments = "--version",
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                }
+            };
+
+            getCompilerVersionProcess.Start();
+            StreamReader reader = getCompilerVersionProcess.StandardOutput;
+            getCompilerVersionProcess.WaitForExit();
+            string version = reader.ReadLine()?.Split(' ').Last() ?? string.Empty;
+            return version;
+        }
+        public int Compile(string outputFile, string[]? arguments, params List<string> inputFiles)
+        {
+            IEnumerable<string> SelectValidFiles(List<string> filesList)
             {
                 foreach (string file in filesList) {
                     bool isValidCpp = File.Exists(file);

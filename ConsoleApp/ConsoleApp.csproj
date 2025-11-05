@@ -28,9 +28,6 @@
     <Content Include="Assets\CompilerTest\test.cpp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\settings.ini">
-		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>
