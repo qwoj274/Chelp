@@ -6,7 +6,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Debugger", "Debugger\Debugg
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IniParser", "IniParser\IniParser.csproj", "{E9A83AA8-A63E-593E-7A07-88FBEBD0D90F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Main", "Main\Main.csproj", "{F57218BE-3B85-FB0E-58C1-A04A2D329F0B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{F57218BE-3B85-FB0E-58C1-A04A2D329F0B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApp", "WpfApp\WpfApp.csproj", "{09E232D5-F16A-428D-9668-BF8580C99ED9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +28,10 @@ Global
 		{F57218BE-3B85-FB0E-58C1-A04A2D329F0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F57218BE-3B85-FB0E-58C1-A04A2D329F0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F57218BE-3B85-FB0E-58C1-A04A2D329F0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09E232D5-F16A-428D-9668-BF8580C99ED9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09E232D5-F16A-428D-9668-BF8580C99ED9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09E232D5-F16A-428D-9668-BF8580C99ED9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09E232D5-F16A-428D-9668-BF8580C99ED9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

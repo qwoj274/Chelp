@@ -1,14 +1,17 @@
+using Debugger;
 using System;
 using System.Collections.Generic;
-using Debugger;
 
 namespace IniParser
 {
-    internal class IniSection(string name)
+    public class IniSection(string name)
     {
         public string Name { get; private set; } = name;
-        private Dictionary<string, object> data = [];
-        public Dictionary<string, object> Data { get { return data; } }
+        private readonly Dictionary<string, object> _data = [];
+        public Dictionary<string, object> Data => _data;
+        public static IniSection Empty => new("");
+        public object? this[string key] => GetValue<object>(key);
+
         public void AddValue(string key, string value)
         {
             object parsedValue;
@@ -18,14 +21,14 @@ namespace IniParser
                 parsedValue = numericResult;
             else
                 parsedValue = value;
-            data.Add(key, parsedValue);
-            Debug.Log($"{GetType().Name}: successfully added [{key}] = {parsedValue.GetType()}:[{parsedValue}] in secton [{Name}]", DebugTypes.DEBUG);
+            _data.Add(key, parsedValue);
+            IniFile.logger?.Invoke($"{GetType().Name}: successfully added [{key}] = {parsedValue.GetType()}:[{parsedValue}] in secton [{Name}]", DebugTypes.DEBUG);
         }
         private bool CheckForKey(string key)
         {
-            if (!data.ContainsKey(key))
+            if (!_data.ContainsKey(key))
             {
-                Debug.Log($"{GetType().Name}: key [{key}] is not found in [{Name}] section!", DebugTypes.ERROR);
+                IniFile.logger?.Invoke($"{GetType().Name}: key [{key}] is not found in [{Name}] section!", DebugTypes.ERROR);
                 return false;
             }
             return true;
@@ -33,18 +36,18 @@ namespace IniParser
         public Type GetTypeByKey(string key)
         {
             if (!CheckForKey(key)) { return typeof(object); }
-            return data[key].GetType();
+            return _data[key].GetType();
         }
-        #nullable enable
         public T? GetValue<T>(string key)
         {
             if (!CheckForKey(key))
                 return default;
+
             try
             {
-                return (T)Convert.ChangeType(data[key], typeof(T));
+                return (T)Convert.ChangeType(_data[key], typeof(T));
             }
-            catch (InvalidCastException)
+            catch (Exception)
             {
                 return default;
             }
