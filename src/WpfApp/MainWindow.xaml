@@ -1,16 +1,95 @@
-﻿<Window x:Class="WpfApp.MainWindow"
+﻿<Window x:Name="ChelpWindow" x:Class="ChelpApp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WpfApp"
+        xmlns:local="clr-namespace:ChelpApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}">
-    <Grid>
+        Title="Chelp " Height="740" Width="1155" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" Background="White" Opacity="0.995" Loaded="ChelpWindow_Loaded">
+    <Grid x:Name="GLOBAL">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="273*"/>
+            <RowDefinition Height="89*"/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="217*"/>
-            <ColumnDefinition Width="583*"/>
+            <ColumnDefinition Width="76*"/>
+            <ColumnDefinition Width="149*"/>
+            <ColumnDefinition Width="88*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel/>
+        <GroupBox x:Name="group_ProjectSetup" Header="Настройка проекта" Foreground="Black" BorderBrush="Black" Margin="10,0,10,10">
+            <Grid x:Name="grid_ProjectSetup" Height="482" Margin="0,0,-12,0" VerticalAlignment="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <StackPanel x:Name="stackpanel_ProjectSetup" Height="468" Margin="0,0,10,-24" VerticalAlignment="Top">
+                    <Grid x:Name="grid_ProjectPathSelection" Height="33">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="26*"/>
+                            <ColumnDefinition Width="0*"/>
+                            <ColumnDefinition Width="196*"/>
+                            <ColumnDefinition Width="113*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="textbox_ProjectPath" TextWrapping="Wrap" Margin="10,11,0,0" IsEnabled="True" VerticalAlignment="Top" Height="18" Grid.ColumnSpan="3" ToolTip="Введите путь к папке, где лежат .cpp файлы" TextChanged="textbox_ProjectPath_TextChanged"/>
+                        <Button x:Name="button_ProjectPathChoice" Content=". . ." Margin="10,10,10,0" Cursor="Hand" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,-7,0,0" Grid.IsSharedSizeScope="True" VerticalAlignment="Top" Height="18" Click="ProjectPathChoiceButton_Click" Grid.Column="3" MinWidth="30"/>
+                    </Grid>
+                    <ListBox x:Name="listbox_ListOfCpp" VerticalContentAlignment="Top" Margin="10,0,10,0" MaxHeight="100" MinHeight="30" Height="99" Background="#FFEFEFEF">
+                        <CheckBox x:Name="checkbox_SelectAll" Content="Выбрать все" IsChecked="False" Click="checkbox_SelectAll_Click" Height="21" Width="88" VerticalContentAlignment="Center" IsEnabled="False"/>
+                    </ListBox>
+                    <Label x:Name="label_noCppFiles" Content="В папке нет .cpp файлов!" HorizontalContentAlignment="Center" FontSize="16" Opacity="0.3" Padding="0,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+        <GroupBox x:Name="group_Compilers" Header="Компиляторы" Grid.Column="1" Margin="10,0,10,10" Foreground="Black" BorderBrush="Black">
+            <Grid x:Name="grid_Compilers">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="45*"/>
+                    <RowDefinition Height="401*"/>
+                    <RowDefinition Height="67*"/>
+                </Grid.RowDefinitions>
+                <ProgressBar x:Name="pb_CompilersSearchingAndTesting" Margin="10,10,10,10" Value="100" UseLayoutRounding="False" HorizontalContentAlignment="Stretch" IsIndeterminate="True" Background="#FFE6E6E6"/>
+                <Label x:Name="label_CompilerStatus" Content="Поиск и тестирование компиляторов..." HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="16"/>
+                <Button x:Name="button_RefreshCompilers" Content="Обновить" Grid.Row="2" VerticalAlignment="Center" Height="20" Margin="40,0,37,0" Click="button_RefreshCompilers_Click"/>
+
+
+
+                <ListView Name="listview_CompilersList" Grid.Row="1" IsSynchronizedWithCurrentItem="False">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=Description}">Компилятор</GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=Fullpath}">Расположение</GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=IsValid}">Прошел тест</GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=Version}">Версия</GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                    <TextBox Height="22" TextWrapping="Wrap" Text="TextBox" Width="1"/>
+                </ListView>
+
+
+
+            </Grid>
+        </GroupBox>
+        <GroupBox x:Name="group_Debug" Header="Отладка" Grid.Row="1" Margin="10,0,10,10" Grid.ColumnSpan="3">
+            <Grid x:Name="grid_Debug">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="219*"/>
+                    <ColumnDefinition Width="904*"/>
+                </Grid.ColumnDefinitions>
+                <ScrollViewer x:Name="sv_DebugScrollViewer" Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <TextBox x:Name="textbox_Debug" TextWrapping="Wrap" Width="884" Height="125" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                </ScrollViewer>
+                <Grid x:Name="grid_DebugControlPanel" Margin="0,0,0,-10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40*"/>
+                        <RowDefinition Height="40*"/>
+                        <RowDefinition Height="56*"/>
+                    </Grid.RowDefinitions>
+                    <Button x:Name="button_ResetCache" Content="Сбросить кэш компиляторов" Margin="10,10,10,10" Click="button_ResetCache_Click"/>
+                    <Button x:Name="button_OpenCacheInExplorer" Content="Открыть в проводнике" Margin="10,10,10,10" Grid.Row="1" Click="button_OpenCacheInExplorer_Click"/>
+                </Grid>
+            </Grid>
+        </GroupBox>
     </Grid>
 </Window>

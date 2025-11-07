@@ -14,6 +14,14 @@ namespace ConsoleApp
             var compilers = CompilerFinder.compilers;
 
             int index = 0;
+
+            if (compilers.Count == 0)
+            {
+                Console.WriteLine("no compilers");
+                Console.ReadKey();
+                return;
+            } 
+
             foreach (var compiler in compilers)
             {
                 index++;
@@ -24,7 +32,7 @@ namespace ConsoleApp
             short choice = Convert.ToInt16(Console.ReadLine());
             choosenCompiler = compilers[choice-1];
 
-            CppFinder cppFinder = new("C:\\Users\\Admin\\Documents\\EX");
+            CppFinder cppFinder = new("C:\\Users\\nikita\\Documents\\EX");
             Console.WriteLine(cppFinder.CppFiles);
 
             Directory.CreateDirectory("Build");
@@ -45,7 +53,7 @@ namespace ConsoleApp
             output.WaitForExit();
             
             string stringReader = reader.ReadToEnd();
-            //Console.WriteLine(stringReader);
+            Console.WriteLine(stringReader);
 
             Console.ReadKey();
         }

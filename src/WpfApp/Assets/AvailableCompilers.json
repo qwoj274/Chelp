@@ -1,0 +1,14 @@
+{
+    "cl.exe": "Microsoft Compiler (MSVC++)",
+    "clang.exe": "LLVM Clang Compiler",
+    "clang++.exe": "LLVM Clang++ Compiler",
+    "gcc.exe": "GCC Compiler",
+    "g++.exe": "GNU C++ Compiler",
+    "icx.exe": "Intel clang-based Compiler for C/C++",
+    "icpx.exe": "Intel clang-based Compiler for C++",
+    "icc.exe": "Intel Compiler for C",
+    "icpc.exe": "Intel Compiler for C (outdated)",
+    "bcc32c.exe": "Embarcadeo C++ Builder (32x)",
+    "bcc64.exe": "Embarcadeo C++ Builder (64x)",
+    "dmc.exe": "Digital Mars C/C++ Compiler"
+}
