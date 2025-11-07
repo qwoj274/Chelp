@@ -1,33 +1,36 @@
-﻿using Debugger;
-using System;
-using System.Collections.Generic;
+﻿using ChelpApp.Debugger;
+using Debug = ChelpApp.Debugger.Debug;
 using System.IO;
 using System.Diagnostics;
-using System.Linq;
+using Newtonsoft.Json;
 
-namespace ConsoleApp.Compilation
+namespace ChelpApp.Compilation
 {
     public class Compiler
     {
-        private Logger logger = Debugger.Debug.Log;
+        private Logger logger = Debug.Log;
         private const string COMPILER_TEST_DIRECTORY = "Assets\\CompilerTest";
         private const string COMPILER_TEST_CPP = "test.cpp";
 
+        [JsonProperty]
         public string Name { get; private set; }
+
+        [JsonProperty]
         public string Description { get; private set; }
-        public bool IsValid { get; private set; } = false;
-        public readonly string Fullpath = string.Empty;
-        public readonly string Version = string.Empty;
+
+        [JsonProperty]
+        public bool IsValid { get; private set; }
+
+        [JsonProperty]
+        public string Fullpath { get; private set; } = string.Empty;
+
+        [JsonProperty]
+        public string Version { get; private set; } = string.Empty;
 
         public Compiler(string name, string description, string fullpath)
         {
             Name = name;
             Description = description;
-            if (!Path.Exists(fullpath))
-            {
-                IsValid = false;
-                return;
-            }
             Fullpath = fullpath;
             Description = description;
             Version = GetVersion();

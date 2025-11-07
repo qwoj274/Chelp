@@ -1,20 +1,15 @@
-﻿using Debugger;
-using System;
-using System.Collections.Generic;
+﻿using ChelpApp.Debugger;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ConsoleApp.Compilation
+namespace ChelpApp.Compilation
 {
     internal class CppFinder
     {
         private readonly Logger logger = Debug.Log;
 
-        private List<string> _cppFiles = [];
+        private List<FileInfo> _cppFiles = [];
 
-        public string CppFiles
+        public string CppFilesAsNumeredList
         {
             get
             {
@@ -23,7 +18,7 @@ namespace ConsoleApp.Compilation
                 foreach (var file in _cppFiles)
                 {
                     index++;
-                    ret += $"{index}) {Path.GetFileName(file)}\n";
+                    ret += $"{index}) {Path.GetFileName(file.Name)}\n";
                 }
                 return ret;
             }
@@ -31,6 +26,7 @@ namespace ConsoleApp.Compilation
 
         public CppFinder(string path)
         {
+            _cppFiles = new List<FileInfo>();
             if (path == null) throw new ArgumentNullException();
 
             if (!Directory.Exists(path))
@@ -39,7 +35,13 @@ namespace ConsoleApp.Compilation
                 return;
             }
 
-            _cppFiles = Directory.GetFiles(path, "*.cpp").ToList<string>();
+            string[] cppFilesStringArray = Directory.GetFiles(path, "*.cpp");
+
+            foreach (string cppFile in cppFilesStringArray)
+            {
+                _cppFiles.Add(new FileInfo(cppFile));
+                logger($"found {cppFile}!", DebugTypes.DEBUG);
+            }
 
             if (_cppFiles.Count == 0)
             {
@@ -47,7 +49,7 @@ namespace ConsoleApp.Compilation
             }
         }
 
-        public List<string> GetCppFiles()
+        public List<FileInfo> GetCppFiles()
         {
             return _cppFiles;
         }

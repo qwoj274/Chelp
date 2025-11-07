@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using Debugger;
+﻿using System.IO;
+using ChelpApp.Debugger;
 using Newtonsoft.Json;
 
-namespace ConsoleApp.Compilation
+namespace ChelpApp.Compilation
 {
     internal static class CompilerFinder
     {
@@ -14,6 +11,7 @@ namespace ConsoleApp.Compilation
         const string CACHE_DIRECTORY = "Cache";
         const string CACHE_FILE_NAME = "Compilers.json";
         static readonly string CACHE_FILE_PATH = Path.Combine(CACHE_DIRECTORY, CACHE_FILE_NAME);
+        public static string FullPathToCacheFile { get; private set; } = Path.GetFullPath(CACHE_DIRECTORY);
 
         static readonly string availableCompilersJsonFilePath = Path.Combine("Assets", "AvailableCompilers.json");
         static readonly Dictionary<string, string> compilersDictionary;
@@ -37,16 +35,18 @@ namespace ConsoleApp.Compilation
             }
             compilersDictionary = tempDict;
         }
-        public static void SearchForCompiler()
+        public static List<Compiler> SearchForCompiler()
         {
             var cachedData = LoadFromCache();
 
             if (cachedData != null)
             {
                 logger($"found cached data in {CACHE_FILE_PATH}!");
-                compilers = cachedData;
-                return;
+                compilers = [.. cachedData.Distinct()];
+                return compilers;
             }
+
+            compilers = new List<Compiler>();
 
             string? pathEnvVariable = Environment.GetEnvironmentVariable("Path");
 
@@ -87,9 +87,10 @@ namespace ConsoleApp.Compilation
             if (compilers.Count == 0)
             {
                 logger("no compilers found!", DebugTypes.ERROR);
-                return;
+                return [];
             }
             SaveInCache();
+            return compilers;
         }
         public static void SaveInCache()
         {
@@ -99,6 +100,7 @@ namespace ConsoleApp.Compilation
             var content = JsonConvert.SerializeObject(compilers);
             writer.Write(content);
             writer.Flush();
+            writer.Close();
             logger($"caching data to {CACHE_FILE_PATH}");
         }
         public static List<Compiler>? LoadFromCache()
@@ -117,6 +119,16 @@ namespace ConsoleApp.Compilation
                 return null;
             }
             return cachedCompilers;
+        }
+        public static void ResetCache()
+        {
+            if (!File.Exists(CACHE_FILE_PATH)) {
+                logger("data is not cached yet or alreay reset!", DebugTypes.WARNING);
+                return;
+            }
+
+            Directory.Delete(CACHE_DIRECTORY, true);
+            logger("cache has reset successfully!", DebugTypes.DEBUG);
         }
     }
 }
