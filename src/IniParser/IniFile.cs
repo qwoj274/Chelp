@@ -29,7 +29,6 @@ namespace IniParser
             ReadLines();
             Parse();
         }
-        public IniFile(FileInfo file) : this(file.FullName) { }
         private void ReadLines()
         {
             string[] lines = File.ReadAllLines(_fullpath);

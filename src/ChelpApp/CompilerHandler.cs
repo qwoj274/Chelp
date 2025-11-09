@@ -1,16 +1,12 @@
 ﻿using ChelpApp.Compilation;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
-using System.Linq;
 
 namespace ChelpApp
 {
     public partial class MainWindow : Window
     {
         List<Compiler> Compilers { get; set; } = [];
-
-        Compiler? chosenCompiler = null;
 
         public static class CompilerHandler
         {
@@ -28,12 +24,8 @@ namespace ChelpApp
 
         private async Task GetCompilersAsync()
         {
-            chosenCompiler = null;
-            var elementsToRemove = sp_CompilerList.Children.OfType<RadioButton>().ToList();
-            foreach (var element in elementsToRemove)
-            {
-                sp_CompilerList.Children.Remove(element);
-            }
+            listview_CompilersList.ItemsSource = null;
+            listview_CompilersList.Items.Clear();
             label_CompilerStatus.Content = "Поиск и тестирование компиляторов...";
             pb_CompilersSearchingAndTesting.IsIndeterminate = true;
             button_RefreshCompilers.IsEnabled = false;
@@ -43,46 +35,24 @@ namespace ChelpApp
             if (compilers.Count == 0)
             {
                 label_CompilerStatus.Content = "Ошибка";
-                pb_CompilersSearchingAndTesting.IsIndeterminate = false;
+                pb_CompilersSearchingAndTesting.IsIndeterminate= false;
                 pb_CompilersSearchingAndTesting.Foreground = Brushes.Red;
-                MessageBox.Show("На компьютере нет доступных компиляторов!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("На компьютере нет доступных компиляторов!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
                 Application.Current.Shutdown();
                 return;
             }
 
-            Compilers = compilers;
+            Compilers = compilers.Distinct().ToList();
             label_CompilerStatus.Content = "Завершено";
             pb_CompilersSearchingAndTesting.IsIndeterminate = false;
             button_RefreshCompilers.IsEnabled = true;
-            foreach (var compiler in compilers)
-            {
-                RadioButton compilerRB = new()
-                {
-                    Content = $"{compiler.Description}",
-                    IsEnabled = compiler.IsValid,
-                    Margin = new(5, 5, 5, 5),
-                    ToolTip = $"Исполняемый файл: {compiler.Name} ({compiler.Fullpath}), версия: {compiler.Version}",
-                };
-                ToolTipService.SetShowOnDisabled(compilerRB, true);
-                compilerRB.Checked += SetChosenCompiler;
-                sp_CompilerList.Children.Add(compilerRB);
-            };
+            listview_CompilersList.ItemsSource = Compilers;
         }
 
-        private void SetChosenCompiler(object sender, RoutedEventArgs e)
-        {
-            if (sender is RadioButton)
-            {
-                int index = sp_CompilerList.Children.IndexOf(sender as RadioButton);
-                chosenCompiler = Compilers[index-1];
-                Debugger.Debug.Log($"chosen compiler: {chosenCompiler?.Fullpath ?? "none"}");
-                return;
-            }
-        }
-
-        public static void ResetCache()
+        public void ResetCache()
         {
             CompilerFinder.ResetCache();
         }
+
     }
 }
