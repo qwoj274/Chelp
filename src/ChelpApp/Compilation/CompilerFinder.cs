@@ -42,7 +42,7 @@ namespace ChelpApp.Compilation
             if (cachedData != null)
             {
                 logger($"found cached data in {CACHE_FILE_PATH}!");
-                compilers = [.. cachedData.Distinct()];
+                compilers = cachedData;
                 return compilers;
             }
 
@@ -123,7 +123,7 @@ namespace ChelpApp.Compilation
         public static void ResetCache()
         {
             if (!File.Exists(CACHE_FILE_PATH)) {
-                logger("data is not cached yet or alreay reset!", DebugTypes.WARNING);
+                logger("data is not cached yet or already reset!", DebugTypes.WARNING);
                 return;
             }
 
