@@ -12,7 +12,7 @@ namespace ChelpApp
     {
         string projectPath = string.Empty;
 
-        List<FileInfo> cppFilesList = [];
+        List<string> cppFilesList = [];
 
         public MainWindow()
         {
@@ -36,7 +36,7 @@ namespace ChelpApp
             projectPath = textbox_ProjectPath.Text;
             CppFinder cppFinder = new(projectPath);
 
-            cppFilesList = cppFinder.GetCppFiles();
+            cppFilesList = cppFinder.GetCppFiles().Select(p => p.FullName).ToList();
 
             bool isNoCppInPath = cppFilesList.Count == 0;
             bool isProjectPathTextboxEmpty = textbox_ProjectPath.Text == string.Empty;
@@ -55,11 +55,11 @@ namespace ChelpApp
             else
             {
                 label_noCppFiles.Visibility = Visibility.Hidden;
-                foreach (FileInfo file in cppFilesList)
+                foreach (string file in cppFilesList)
                 {
                     CheckBox listItem = new()
                     {
-                        Content = file.Name,
+                        Content = Path.GetFileName(file),
                     };
                     listbox_ListOfCpp.Items.Add(listItem);
                 }
@@ -85,16 +85,8 @@ namespace ChelpApp
 
         private CheckBox[] GetAllCheckboxesExceptSelectAll()
         {
-            var listOfCpp = new CheckBox[listbox_ListOfCpp.Items.Count];
-
-            listbox_ListOfCpp.Items.CopyTo(listOfCpp, 0);
-
-            if (listOfCpp.Length < 2)
-            {
-                return [];
-            }
-
-            return listOfCpp;
+            var arrayOfCpp = listbox_ListOfCpp.Items.OfType<CheckBox>().ToArray();
+            return arrayOfCpp;
         }
 
         private void checkbox_SelectAll_Click(object sender, RoutedEventArgs e)
@@ -130,7 +122,6 @@ namespace ChelpApp
         {
             textbox_Debug.Text += message + "\n";
             textbox_Debug.ScrollToEnd();
-            sv_DebugScrollViewer.ScrollToEnd();
         }
 
         private void button_ResetCache_Click(object sender, RoutedEventArgs e)
@@ -146,7 +137,15 @@ namespace ChelpApp
                 return;
             }
 
-            Process.Start("explorer.exe", path);
+            using (Process explorer = new())
+            {
+                explorer.StartInfo = new()
+                {
+                    FileName = "explorer.exe",
+                    Arguments = path
+                };
+                explorer.Start();
+            }
         }
 
         private void button_OpenLog_Click(object sender, RoutedEventArgs e)
@@ -157,7 +156,15 @@ namespace ChelpApp
                 return;
             }
 
-            Process.Start("notepad.exe", path);
+            using (Process notepad = new())
+            {
+                notepad.StartInfo = new()
+                {
+                    FileName = "notepad",
+                    Arguments = path
+                };
+                notepad.Start();
+            }
         }
 
         private void button_ResetLog_Click(object sender, RoutedEventArgs e)
@@ -165,5 +172,76 @@ namespace ChelpApp
             Debugger.Debug.ResetLog();
             textbox_Debug.Text = string.Empty;
         }
-    } 
+
+        private void OpenExplorerCausedByIncorrectProjectpath()
+        {
+            OpenFolderDialog dialog = new OpenFolderDialog();
+            dialog.ShowDialog();
+
+            textbox_ProjectPath.Text = dialog.FolderName;
+            OnPathSelected();
+        }
+
+        private async Task CompileCppFiles()
+        {
+            if (chosenCompiler == null)
+            {
+                MessageBox.Show("Перед компиляцией выберите компилятор!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (projectPath == string.Empty)
+            {
+                var result = MessageBox.Show("Выберите путь до ваших .cpp файлов!", "Ошибка", MessageBoxButton.OKCancel, MessageBoxImage.Error);
+                if (result == MessageBoxResult.OK)
+                {
+                    OpenExplorerCausedByIncorrectProjectpath();
+                }
+                return;
+            }
+
+            if (!Path.Exists(projectPath))
+            {
+                MessageBox.Show("Выбранного пути не существует!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (cppFilesList.Count == 0)
+            {
+                MessageBox.Show("Не выбраны файлы для компиляции, или таких файлов нет в выбранной папке!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            string outputFilePath = Path.Combine(projectPath, "Out", "out.exe");
+            int compilationErrorCode = await Task.Run(() => chosenCompiler.Compile(outputFilePath, null, cppFilesList));
+
+            /*
+             display progress bar, waiting for compilation finished
+             */
+
+            if  (compilationErrorCode != 0)
+            {
+                MessageBox.Show("Компиляция не удалась по неизвестной причине! Подробнее в log.txt...", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                return;
+            }
+
+            Process runOutExecutable = new Process()
+            {
+                StartInfo = new()
+                {
+                    FileName = outputFilePath,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                }
+            };
+
+            using (runOutExecutable)
+            {
+                runOutExecutable.Start();
+                string output = runOutExecutable.StandardOutput.ReadToEnd();
+                string error = runOutExecutable.StandardError.ReadToEnd();
+                runOutExecutable.WaitForExit();
+
+            }
+        }
+    }
 }
