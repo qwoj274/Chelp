@@ -6,8 +6,4 @@
 	  <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Debugger\Debugger.csproj" />
-  </ItemGroup>
-
 </Project>
