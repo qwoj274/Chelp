@@ -7,3 +7,4 @@ obj/
 .vs/
 /src/ChelpApp/publish.bat
 /src/ChelpApp/Chelp.zip
+/src/ChelpApp/Assets/CompilerTest/Out/out.exe
