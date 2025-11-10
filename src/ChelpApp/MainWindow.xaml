@@ -112,8 +112,8 @@
                     <Label Content="Аргументы для компилятора: (можно оставить поле пустым)" HorizontalAlignment="Left" Margin="10,0,0,0"/>
                     <TextBox x:Name="textbox_CompilerArgs" TextWrapping="Wrap" TextChanged="textbox_CompilerArgs_TextChanged"/>
                 </StackPanel>
-                <Label Content="Путь до файла:" FontSize="14" VerticalContentAlignment="Center" Margin="0,2,0,4" Grid.Row="1" HorizontalAlignment="Center" Width="106"/>
-                <Button x:Name="button_OpenCompiledInExplorer" Content="Открыть в проводнике" Grid.Row="1" FontSize="11" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" VerticalAlignment="Center" Height="19" Grid.Column="2" HorizontalAlignment="Center" Width="120"/>
+                <Label Content="Путь до .exe:" FontSize="14" VerticalContentAlignment="Center" Margin="0,2,0,4" Grid.Row="1" HorizontalAlignment="Center" Width="106"/>
+                <Button x:Name="button_OpenCompiledInExplorer" Content="Открыть в проводнике" Grid.Row="1" FontSize="11" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" VerticalAlignment="Center" Height="19" Grid.Column="2" HorizontalAlignment="Center" Width="120" Click="button_OpenCompiledInExplorer_Click"/>
                 <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Margin="0,2,0,5">
                     <Label Content="Вывод программы:" Margin="10,0,0,0" FontSize="16"/>
                     <Border BorderBrush="Black" BorderThickness="1" MinHeight="100" CornerRadius="5,5,5,5" Height="292">
@@ -135,7 +135,7 @@
                     </Grid>
                 </StackPanel>
                 <Button x:Name="button_CompileAndRun" Content="Выполнить" Grid.ColumnSpan="3" Grid.Row="3" Margin="40,15,40,15" Click="button_CompileAndRun_Click" FontSize="14"/>
-                <TextBox x:Name="textbox_CompiledFilePath" Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Margin="5,5,5,5" IsReadOnly="True"/>
+                <TextBox x:Name="textbox_CompiledFilePath" Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Margin="5,5,5,5" IsReadOnly="True" MaxLines="1" HorizontalScrollBarVisibility="Auto" Background="White"/>
             </Grid>
         </GroupBox>
     </Grid>

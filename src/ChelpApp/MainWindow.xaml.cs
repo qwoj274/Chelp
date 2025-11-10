@@ -12,6 +12,7 @@ namespace ChelpApp
     public partial class MainWindow : Window
     {
         string projectPath = string.Empty;
+        string outputFilePath = string.Empty;
 
         List<string> cppFilesList = [];
         List<string> selectedCppFilesList = [];
@@ -74,12 +75,22 @@ namespace ChelpApp
         {
             CheckBox _sender = sender as CheckBox;
             var index = listbox_ListOfCpp.Items.IndexOf(_sender)-1;
+
+            bool isAllChecked = true;
+            foreach (var checkbox in GetAllCheckboxesExceptSelectAll())
+            {
+                isAllChecked &= checkbox.IsChecked ?? false;
+                if (!isAllChecked) { break; }
+            }
+            checkbox_SelectAll.IsChecked = isAllChecked;
+
             if (_sender.IsChecked ?? false)
             {
                 selectedCppFilesList.Add(cppFilesList[index]);
             } else
             {
                 selectedCppFilesList.Remove(cppFilesList[index]);
+                checkbox_SelectAll.IsChecked = false;
             }
         }
 
@@ -102,16 +113,20 @@ namespace ChelpApp
 
         private CheckBox[] GetAllCheckboxesExceptSelectAll()
         {
-            var arrayOfCpp = listbox_ListOfCpp.Items.OfType<CheckBox>().ToArray();
-            return arrayOfCpp;
+            List<CheckBox> arrayOfCpp = [];
+            for (int i = 1; i <  listbox_ListOfCpp.Items.Count; i++)
+            {
+                arrayOfCpp.Add((CheckBox)listbox_ListOfCpp.Items[i]);
+            }
+            return arrayOfCpp.ToArray();
         }
 
         private void checkbox_SelectAll_Click(object sender, RoutedEventArgs e)
         {
-            selectedCppFilesList.Clear();
+            if (!checkbox_SelectAll.IsChecked ?? false) { return; }
             foreach (var checkbox in GetAllCheckboxesExceptSelectAll())
             {
-                checkbox.IsChecked = checkbox_SelectAll.IsChecked;
+                checkbox.IsChecked = true;
             }
         }
 
@@ -252,7 +267,8 @@ namespace ChelpApp
 
             textbox_ProgramOutput.Text = string.Empty;
             button_CompileAndRun.IsEnabled = false;
-            string outputFilePath = Path.Combine(projectPath, "Out", "out.exe");
+            outputFilePath = Path.Combine(projectPath, "Out", "out.exe");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath));
             string[]? compilerArgsList = CompilerArgs?.Split(" ");
 
             label_ProgramStatus.Content = "Компиляция...";
@@ -260,13 +276,13 @@ namespace ChelpApp
 
             int compilationErrorCode = await Task.Run(() => chosenCompiler.Compile(outputFilePath, compilerArgsList, selectedCppFilesList));
             textbox_CompiledFilePath.Text = outputFilePath;
-            button_CompileAndRun.IsEnabled = true;
 
             if (compilationErrorCode != 0)
             {
                 MessageBox.Show("Компиляция не удалась по неизвестной причине! Подробности в log.txt...", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                label_ProgramStatus.Content = "Ошибка компиляции!";
+                label_ProgramStatus.Content = "Ошибка!";
                 label_ProgramStatus.Foreground = Brushes.Red;
+                button_CompileAndRun.IsEnabled = true;
                 return;
             }
 
@@ -294,6 +310,28 @@ namespace ChelpApp
             label_ProgramStatus.Content = "Завершено!";
             label_ProgramStatus.Foreground = Brushes.DarkGreen;
             button_CompileAndRun.IsEnabled = true;
+        }
+
+        private void button_OpenCompiledInExplorer_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Path.Exists(outputFilePath))
+            {
+                return;
+            }
+
+            Process openExplorer = new Process()
+            {
+                StartInfo = new()
+                {
+                    FileName = "explorer.exe",
+                    Arguments = Path.GetDirectoryName(outputFilePath),
+                }
+            };
+
+            using (openExplorer)
+            {
+                openExplorer.Start();
+            }
         }
     }
 }
