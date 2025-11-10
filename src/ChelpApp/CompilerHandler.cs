@@ -11,6 +11,7 @@ namespace ChelpApp
         List<Compiler> Compilers { get; set; } = [];
 
         Compiler? chosenCompiler = null;
+        string? CompilerArgs { get; set; } = string.Empty;
 
         public static class CompilerHandler
         {

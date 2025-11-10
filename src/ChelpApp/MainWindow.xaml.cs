@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 
 namespace ChelpApp
@@ -13,6 +14,7 @@ namespace ChelpApp
         string projectPath = string.Empty;
 
         List<string> cppFilesList = [];
+        List<string> selectedCppFilesList = [];
 
         public MainWindow()
         {
@@ -61,8 +63,23 @@ namespace ChelpApp
                     {
                         Content = Path.GetFileName(file),
                     };
+                    listItem.Checked += OnCppCheckboxClicked;
+                    listItem.Unchecked += OnCppCheckboxClicked;
                     listbox_ListOfCpp.Items.Add(listItem);
                 }
+            }
+        }
+
+        private void OnCppCheckboxClicked(object sender, RoutedEventArgs e)
+        {
+            CheckBox _sender = sender as CheckBox;
+            var index = listbox_ListOfCpp.Items.IndexOf(_sender)-1;
+            if (_sender.IsChecked ?? false)
+            {
+                selectedCppFilesList.Add(cppFilesList[index]);
+            } else
+            {
+                selectedCppFilesList.Remove(cppFilesList[index]);
             }
         }
 
@@ -91,6 +108,7 @@ namespace ChelpApp
 
         private void checkbox_SelectAll_Click(object sender, RoutedEventArgs e)
         {
+            selectedCppFilesList.Clear();
             foreach (var checkbox in GetAllCheckboxesExceptSelectAll())
             {
                 checkbox.IsChecked = checkbox_SelectAll.IsChecked;
@@ -182,7 +200,21 @@ namespace ChelpApp
             OnPathSelected();
         }
 
-        private async Task CompileCppFiles()
+        private void textbox_CompilerArgs_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender != null)
+            {
+                if ((sender as TextBox).Text != string.Empty)
+                {
+                    CompilerArgs = (sender as TextBox).Text;
+                    return;
+                }
+                CompilerArgs = null;
+                return;
+            }
+        }
+
+        async void button_CompileAndRun_Click(object sender, RoutedEventArgs e)
         {
             if (chosenCompiler == null)
             {
@@ -206,21 +238,35 @@ namespace ChelpApp
                 return;
             }
 
-            if (cppFilesList.Count == 0)
+            if (selectedCppFilesList.Count == 0)
             {
-                MessageBox.Show("Не выбраны файлы для компиляции, или таких файлов нет в выбранной папке!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Не выбраны файлы для компиляции!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
-            string outputFilePath = Path.Combine(projectPath, "Out", "out.exe");
-            int compilationErrorCode = await Task.Run(() => chosenCompiler.Compile(outputFilePath, null, cppFilesList));
 
-            /*
-             display progress bar, waiting for compilation finished
-             */
-
-            if  (compilationErrorCode != 0)
+            if (selectedCppFilesList.Count == 0)
             {
-                MessageBox.Show("Компиляция не удалась по неизвестной причине! Подробнее в log.txt...", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("В папке нет .cpp файлов!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
+            textbox_ProgramOutput.Text = string.Empty;
+            button_CompileAndRun.IsEnabled = false;
+            string outputFilePath = Path.Combine(projectPath, "Out", "out.exe");
+            string[]? compilerArgsList = CompilerArgs?.Split(" ");
+
+            label_ProgramStatus.Content = "Компиляция...";
+            label_ProgramStatus.Foreground = Brushes.Blue;
+
+            int compilationErrorCode = await Task.Run(() => chosenCompiler.Compile(outputFilePath, compilerArgsList, selectedCppFilesList));
+            textbox_CompiledFilePath.Text = outputFilePath;
+            button_CompileAndRun.IsEnabled = true;
+
+            if (compilationErrorCode != 0)
+            {
+                MessageBox.Show("Компиляция не удалась по неизвестной причине! Подробности в log.txt...", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                label_ProgramStatus.Content = "Ошибка компиляции!";
+                label_ProgramStatus.Foreground = Brushes.Red;
                 return;
             }
 
@@ -231,17 +277,23 @@ namespace ChelpApp
                     FileName = outputFilePath,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
+                    CreateNoWindow = true,
                 }
             };
-
-            using (runOutExecutable)
+            int programExitCode;
+            string programErrors = string.Empty;
+            using ( runOutExecutable )
             {
-                runOutExecutable.Start();
-                string output = runOutExecutable.StandardOutput.ReadToEnd();
-                string error = runOutExecutable.StandardError.ReadToEnd();
-                runOutExecutable.WaitForExit();
-
+                label_ProgramStatus.Content = "Запуск...";
+                await Task.Run(() => runOutExecutable.Start());
+                textbox_ProgramOutput.Text = await runOutExecutable.StandardOutput.ReadToEndAsync();
+                await runOutExecutable.WaitForExitAsync();
+                programExitCode = runOutExecutable.ExitCode;
             }
+            label_ProgramExitCode.Content = $"{programExitCode}";
+            label_ProgramStatus.Content = "Завершено!";
+            label_ProgramStatus.Foreground = Brushes.DarkGreen;
+            button_CompileAndRun.IsEnabled = true;
         }
     }
 }
