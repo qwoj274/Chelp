@@ -35,7 +35,7 @@ namespace ChelpApp.Compilation
                 return;
             }
 
-            string[] cppFilesStringArray = Directory.GetFiles(path, "*.cpp");
+            string[] cppFilesStringArray = Directory.GetFiles(path.Trim(' '), "*.cpp");
 
             foreach (string cppFile in cppFilesStringArray)
             {

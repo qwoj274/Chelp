@@ -35,10 +35,11 @@ namespace ChelpApp
 
         private void OnPathSelected()
         {
-            UpdateListOfCpp();
-            projectPath = textbox_ProjectPath.Text;
+            ClearListOfCppCheckBoxes();
+            projectPath = textbox_ProjectPath.Text.Trim();
             CppFinder cppFinder = new(projectPath);
 
+            selectedCppFilesList.Clear();
             cppFilesList = cppFinder.GetCppFiles().Select(p => p.FullName).ToList();
 
             bool isNoCppInPath = cppFilesList.Count == 0;
@@ -76,13 +77,13 @@ namespace ChelpApp
             CheckBox _sender = sender as CheckBox;
             var index = listbox_ListOfCpp.Items.IndexOf(_sender)-1;
 
-            bool isAllChecked = true;
-            foreach (var checkbox in GetAllCheckboxesExceptSelectAll())
-            {
-                isAllChecked &= checkbox.IsChecked ?? false;
-                if (!isAllChecked) { break; }
-            }
-            checkbox_SelectAll.IsChecked = isAllChecked;
+            //bool isAllChecked = true;
+            //foreach (var checkbox in GetAllCheckboxesExceptSelectAll())
+            //{
+            //    isAllChecked &= checkbox.IsChecked ?? false;
+            //    if (!isAllChecked) { break; }
+            //}
+            //checkbox_SelectAll.IsChecked = isAllChecked;
 
             if (_sender.IsChecked ?? false)
             {
@@ -92,9 +93,16 @@ namespace ChelpApp
                 selectedCppFilesList.Remove(cppFilesList[index]);
                 checkbox_SelectAll.IsChecked = false;
             }
+
+            // debug
+            DebugWriteLine("==================");
+            foreach (var file in selectedCppFilesList)
+            {
+                DebugWriteLine(file);
+            }
         }
 
-        private void UpdateListOfCpp()
+        private void ClearListOfCppCheckBoxes()
         {
             if (listbox_ListOfCpp.Items.Count < 2)
             {
@@ -123,10 +131,9 @@ namespace ChelpApp
 
         private void checkbox_SelectAll_Click(object sender, RoutedEventArgs e)
         {
-            if (!checkbox_SelectAll.IsChecked ?? false) { return; }
             foreach (var checkbox in GetAllCheckboxesExceptSelectAll())
             {
-                checkbox.IsChecked = true;
+                checkbox.IsChecked = checkbox_SelectAll.IsChecked;
             }
         }
 
