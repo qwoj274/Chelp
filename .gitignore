@@ -8,3 +8,4 @@ obj/
 /src/ChelpApp/publish.bat
 /src/ChelpApp/Chelp.zip
 /src/ChelpApp/Assets/CompilerTest/Out/out.exe
+/src/ChelpApp/Debug/log.txt
