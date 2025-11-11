@@ -9,3 +9,4 @@ obj/
 /src/ChelpApp/Chelp.zip
 /src/ChelpApp/Assets/CompilerTest/Out/out.exe
 /src/ChelpApp/Debug/log.txt
+/src/ChelpApp/Cache/Compilers.json
