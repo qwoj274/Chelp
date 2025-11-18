@@ -93,9 +93,10 @@ namespace ChelpApp.Compilation
             };
 
             getCompilerVersionProcess.Start();
-            StreamReader reader = getCompilerVersionProcess.StandardOutput;
             getCompilerVersionProcess.WaitForExit();
-            string version = reader.ReadLine()?.Split(' ').Last() ?? string.Empty;
+
+            using StreamReader rdr = getCompilerVersionProcess.StandardOutput;
+            string version = rdr.ReadLine()?.Split(' ').Last() ?? string.Empty;
             return version;
         }
         public int Compile(string outputFile, string[]? arguments, params List<string> inputFiles)
@@ -111,16 +112,18 @@ namespace ChelpApp.Compilation
                 }
             };
 
-            List<string> filesToCompile = [.. SelectValidFiles(inputFiles)];
             List<string> commandParts = [];
-            commandParts.AddRange(filesToCompile);
 
             if (arguments != null)
             {
                 commandParts.AddRange(arguments);
             }
 
+            List<string> filesToCompile = [.. SelectValidFiles(inputFiles)];
+            commandParts.AddRange(filesToCompile);
+
             commandParts.AddRange("-o", $"{outputFile}");
+            string finalCommand = $"\"{Path.GetFileName(Fullpath)}\" " + string.Join(" ", commandParts);
 
             Process compilationProcess = new()
             {
@@ -130,17 +133,29 @@ namespace ChelpApp.Compilation
                     Arguments = String.Join(" ", commandParts),
                     CreateNoWindow = true,
                     RedirectStandardError = true,
+                    RedirectStandardOutput = true,
                 }
             };
 
             using (compilationProcess)
             {
                 compilationProcess.Start();
+                logger($"running: {finalCommand}");
+                logger($"compiling with {Fullpath}...");
+                logger($"args: {string.Join("; ", arguments ?? Array.Empty<string>())}");
+
                 compilationProcess.WaitForExit();
-                var exitCode = compilationProcess.ExitCode;
+
+                var output = compilationProcess.StandardOutput.ReadToEnd().ReplaceLineEndings("\r\n").Split("\r\n");
                 var errors = compilationProcess.StandardError.ReadToEnd().ReplaceLineEndings("\r\n").Split("\r\n");
+                var exitCode = compilationProcess.ExitCode;
+
                 if (exitCode == 0)
                 {
+                    foreach (var line in output)
+                    {
+                        logger(line);
+                    }
                     logger($"{Name}: compilation was successful!");
                 } else
                 {

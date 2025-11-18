@@ -11,6 +11,7 @@ namespace ChelpApp.Compilation
         const string CACHE_DIRECTORY = "Cache";
         const string CACHE_FILE_NAME = "Compilers.json";
         static readonly string CACHE_FILE_PATH = Path.Combine(CACHE_DIRECTORY, CACHE_FILE_NAME);
+        private static readonly CompilersCacheLoader cacheLoader = new(CACHE_FILE_PATH);
         public static string FullPathToCacheFile { get; private set; } = Path.GetFullPath(CACHE_DIRECTORY);
 
         static readonly string availableCompilersJsonFilePath = Path.Combine("Assets", "AvailableCompilers.json");
@@ -37,11 +38,10 @@ namespace ChelpApp.Compilation
         }
         public static List<Compiler> SearchForCompiler()
         {
-            var cachedData = LoadFromCache();
+            var cachedData = cacheLoader.LoadFromCache();
 
             if (cachedData != null)
             {
-                logger($"found cached data in {CACHE_FILE_PATH}!");
                 compilers = cachedData;
                 return compilers;
             }
@@ -89,46 +89,12 @@ namespace ChelpApp.Compilation
                 logger("no compilers found!", DebugTypes.ERROR);
                 return [];
             }
-            SaveInCache();
+            cacheLoader.SaveInCache(compilers);
             return compilers;
-        }
-        public static void SaveInCache()
-        {
-            Directory.CreateDirectory(CACHE_DIRECTORY);
-            var writer = File.CreateText(CACHE_FILE_PATH);
-
-            var content = JsonConvert.SerializeObject(compilers);
-            writer.Write(content);
-            writer.Flush();
-            writer.Close();
-            logger($"caching data to {CACHE_FILE_PATH}");
-        }
-        public static List<Compiler>? LoadFromCache()
-        {
-            if (!File.Exists(CACHE_FILE_PATH))
-            {
-                return null;
-            }
-
-            string fileContent = File.ReadAllText(CACHE_FILE_PATH);
-            var cachedCompilers = new List<Compiler>();
-            cachedCompilers = JsonConvert.DeserializeObject<List<Compiler>>(fileContent);
-
-            if (cachedCompilers?.Count == 0)
-            {
-                return null;
-            }
-            return cachedCompilers;
         }
         public static void ResetCache()
         {
-            if (!File.Exists(CACHE_FILE_PATH)) {
-                logger("data is not cached yet or already reset!", DebugTypes.WARNING);
-                return;
-            }
-
-            Directory.Delete(CACHE_DIRECTORY, true);
-            logger("cache has reset successfully!", DebugTypes.DEBUG);
+            cacheLoader.ResetCache();
         }
     }
 }

@@ -74,31 +74,16 @@ namespace ChelpApp
 
         private void OnCppCheckboxClicked(object sender, RoutedEventArgs e)
         {
-            CheckBox _sender = sender as CheckBox;
+            CheckBox? _sender = sender as CheckBox;
             var index = listbox_ListOfCpp.Items.IndexOf(_sender)-1;
 
-            //bool isAllChecked = true;
-            //foreach (var checkbox in GetAllCheckboxesExceptSelectAll())
-            //{
-            //    isAllChecked &= checkbox.IsChecked ?? false;
-            //    if (!isAllChecked) { break; }
-            //}
-            //checkbox_SelectAll.IsChecked = isAllChecked;
-
-            if (_sender.IsChecked ?? false)
+            if (_sender?.IsChecked ?? false)
             {
                 selectedCppFilesList.Add(cppFilesList[index]);
             } else
             {
                 selectedCppFilesList.Remove(cppFilesList[index]);
                 checkbox_SelectAll.IsChecked = false;
-            }
-
-            // debug
-            DebugWriteLine("==================");
-            foreach (var file in selectedCppFilesList)
-            {
-                DebugWriteLine(file);
             }
         }
 
@@ -226,13 +211,13 @@ namespace ChelpApp
         {
             if (sender != null)
             {
-                if ((sender as TextBox).Text != string.Empty)
+                var _sender = sender as TextBox;
+                if (_sender?.Text != string.Empty)
                 {
-                    CompilerArgs = (sender as TextBox).Text;
+                    CompilerArgs = _sender?.Text;
                     return;
                 }
                 CompilerArgs = null;
-                return;
             }
         }
 
